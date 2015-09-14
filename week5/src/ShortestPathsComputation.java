@@ -37,9 +37,9 @@ public class ShortestPathsComputation extends BasicComputation<
       Vertex<IntWritable, IntWritable, NullWritable> vertex,
       Iterable<IntWritable> messages) throws IOException {
     if (getSuperstep() == 0) {
-      vertex.setValue(new IntWritable(Int.MAX_VALUE));
+      vertex.setValue(new IntWritable(Integer.MAX_VALUE));
     }
-    int minDist = isSource(vertex) ? 0d : Int.MAX_VALUE;
+    int minDist = isSource(vertex) ? 0d : Integer.MAX_VALUE;
     for (IntWritable message : messages) {
       minDist = Math.min(minDist, message.get());
     }
