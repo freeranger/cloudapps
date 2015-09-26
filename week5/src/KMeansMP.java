@@ -93,7 +93,7 @@ public final class KMeansMP {
         JavaRDD<Vector> points = lines.map(new ParsePoint());
         JavaRDD<String> titles = lines.map(new ParseTitle());
 
-        KMeansModel model = KMeans.train(points.rdd(), k, iterations, runs, KMeans.RANDOM(), 0);
+        model = KMeans.train(points.rdd(), k, iterations, runs, KMeans.RANDOM(), 0);
 
         results =titles.zip(points).mapToPair(new ClusterCars(model)).groupByKey();
         results.foreach(new PrintCluster(model));
