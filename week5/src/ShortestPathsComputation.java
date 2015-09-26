@@ -7,6 +7,11 @@ import org.apache.hadoop.io.NullWritable;
 
 import java.io.IOException;
 
+@Algorithm(
+    name = "Shortest paths",
+    description = "Finds all shortest paths from a selected vertex"
+)
+
 /**
  * Compute shortest paths from a given source.
  */
@@ -26,10 +31,33 @@ public class ShortestPathsComputation extends BasicComputation<
   private boolean isSource(Vertex<IntWritable, ?, ?> vertex) {
     return vertex.getId().get() == SOURCE_ID.get(getConf());
   }
-
+  
   @Override
   public void compute(
       Vertex<IntWritable, IntWritable, NullWritable> vertex,
       Iterable<IntWritable> messages) throws IOException {
+    if (getSuperstep() == 0) {
+      vertex.setValue(new IntWritable(Int.MAX_VALUE));
+    }
+    int minDist = isSource(vertex) ? 0d : Int.MAX_VALUE;
+    for (IntWritable message : messages) {
+      minDist = Math.min(minDist, message.get());
+    }
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Vertex " + vertex.getId() + " got minDist = " + minDist +
+          " vertex value = " + vertex.getValue());
+    }
+    if (minDist < vertex.getValue().get()) {
+      vertex.setValue(new IntWritable(minDist));
+      for (Edge<IntWritable, NullWritable> edge : vertex.getEdges()) {
+        int distance = minDist + edge.getValue().get();
+        if (LOG.isDebugEnabled()) {
+          LOG.debug("Vertex " + vertex.getId() + " sent to " +
+              edge.getTargetVertexId() + " = " + distance);
+        }
+  sendMessage(edge.getTargetVertexId(), new IntWritable(distance));
+      }
+    }
+    vertex.voteToHalt();
   }
 }
